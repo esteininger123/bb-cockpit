@@ -1768,6 +1768,7 @@
     MOCK.visionTarget = metrics.visionTarget;
     render();
     checkAndCelebrateSale(metrics.lastSale);  // Konfetti+Banner wenn neuer Verkauf erkannt
+    checkMilestones(metrics);                  // Schwellwert-Trigger (Vollbild-Feier)
     rebuildHighlightTicker();                  // Lauftext unten mit frischen Daten
     updateYearProgress();  // Pipeline-Hinweis im Verkauf 2026 mit aktuellen Live-Werten
     // Diagnose-Overlay füllen
