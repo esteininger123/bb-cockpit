@@ -9,5 +9,15 @@
 !index.html
 !vercel.json
 
+# Bilder (z.B. für Easter-Eggs wie Henry, Meilenstein-Bilder)
+!*.jpg
+!*.jpeg
+!*.png
+!*.webp
+!*.gif
+!*.svg
+!assets/
+!assets/**
+
 # macOS-Müll explizit raus
 .DS_Store
