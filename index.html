@@ -666,7 +666,7 @@
       <div class="brand-mark">B&amp;B</div>
       <div class="brand-text">
         <div class="title">B&amp;B Immo Cockpit</div>
-        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-auto</div>
+        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-konfetti</div>
       </div>
     </div>
     <div class="clock">
@@ -1807,6 +1807,95 @@
     }
   }
   document.addEventListener('DOMContentLoaded', boot);
+
+  // ====== Sale Celebration: Konfetti + Banner ======
+  const SALE_ID_KEY = 'bb-cockpit-last-sale-id';
+
+  function saleIdFrom(sale) {
+    if (!sale) return null;
+    const w = sale.whenISO || '';
+    const who = sale.who || '';
+    const p = sale.price != null ? String(sale.price) : '';
+    return `${w}|${who}|${p}`;
+  }
+
+  function checkAndCelebrateSale(currentSale) {
+    if (!currentSale) return;
+    const currentId = saleIdFrom(currentSale);
+    if (!currentId || currentId.startsWith('|')) return;  // unvollständige Daten
+
+    let lastSeenId = null;
+    try { lastSeenId = localStorage.getItem(SALE_ID_KEY); } catch (e) {}
+
+    if (lastSeenId === null) {
+      // Erster Lauf — nur speichern, nicht feiern
+      try { localStorage.setItem(SALE_ID_KEY, currentId); } catch (e) {}
+      return;
+    }
+
+    if (lastSeenId !== currentId) {
+      // NEUER VERKAUF! 🎉
+      celebrateNewSale(currentSale);
+      try { localStorage.setItem(SALE_ID_KEY, currentId); } catch (e) {}
+    }
+  }
+
+  function celebrateNewSale(sale) {
+    const banner = document.getElementById('saleBanner');
+    if (!banner) return;
+    document.getElementById('saleBannerWho').textContent = sale.who || 'Käufer';
+    const what = [(sale.short || ''), (sale.what || '')].filter(Boolean).join(' · ');
+    document.getElementById('saleBannerWhat').textContent = what || '—';
+    document.getElementById('saleBannerPrice').textContent = sale.price ? eur(sale.price) : '';
+    banner.classList.add('show');
+    banner.setAttribute('aria-hidden', 'false');
+    spawnConfetti(140);
+    // Banner 7 Sek anzeigen, dann fade out
+    setTimeout(() => {
+      banner.classList.remove('show');
+      banner.setAttribute('aria-hidden', 'true');
+    }, 7000);
+  }
+
+  function spawnConfetti(count) {
+    const colors = ['#d4a740', '#f5c757', '#b88a2c', '#4ade80', '#fb923c', '#60a5fa', '#f1ecdc', '#ffffff'];
+    const container = document.getElementById('confettiContainer');
+    if (!container) return;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const size = 6 + Math.random() * 8;
+      piece.style.left   = (Math.random() * 100) + '%';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDelay    = (Math.random() * 1.5) + 's';
+      piece.style.animationDuration = (3.2 + Math.random() * 2.4) + 's';
+      piece.style.width  = size + 'px';
+      piece.style.height = size + 'px';
+      container.appendChild(piece);
+      setTimeout(() => piece.remove(), 6500);
+    }
+  }
+
+  // Debug-Trigger: 3x "C" drücken zeigt eine Test-Celebration
+  (function() {
+    let last = 0, count = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'c' && e.key !== 'C') return;
+      const now = Date.now();
+      if (now - last > 1500) count = 0;
+      count++; last = now;
+      if (count >= 3) {
+        count = 0;
+        celebrateNewSale({
+          who: 'Test-Käufer',
+          short: 'Testobjekt',
+          what: '3-Zimmer · 72 m²',
+          price: 234500,
+          whenISO: new Date().toISOString(),
+        });
+      }
+    });
+  })();
 </script>
 
 </body>
