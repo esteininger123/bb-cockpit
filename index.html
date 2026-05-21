@@ -2150,6 +2150,194 @@
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(rebuildHighlightTicker, 300);
   });
+
+  // ====== Milestone-Trigger (Vollbild-Feier bei Schwellwerten) ======
+  //
+  // ⚠️  EDGAR: HIER IST DIE EDITIERBARE STELLE FÜR DEINE MEILENSTEINE
+  //
+  // Jeder Meilenstein hat:
+  //   - metric:     auf welche Zahl er reagiert (siehe Metric-Liste unten)
+  //   - threshold:  ab welchem Wert er triggert
+  //   - headline:   große Überschrift im Banner (z.B. "10 Millionen geknackt!")
+  //   - icon:       Emoji oben (oder leer wenn imageUrl gesetzt ist)
+  //   - imageUrl:   (optional) URL zu einem Bild/GIF — überschreibt das Emoji
+  //   - customText: (optional) kleinerer Text unter der Headline (Witz, Spruch, was du willst)
+  //
+  // Metriken die verfügbar sind:
+  //   'lifetimeBought'   — Anzahl WEs seit Gründung gekauft
+  //   'lifetimeSold'     — Anzahl WEs seit Gründung verkauft
+  //   'lifetimeRevenue'  — Lifetime Verkaufsvolumen (€)
+  //   'sold2026Count'    — Anzahl Notartermine 2026
+  //   'sold2026Revenue'  — Umsatz 2026 (€)
+  //   'einkauf2026Gik'   — Einkauf GIK 2026 (€)
+  //   'einkauf2026We'    — Anzahl WEs neu im Bestand 2026
+  //
+  // Reihenfolge ist egal. Werte kannst du jederzeit ändern. Sprüche/Bilder reinschreiben:
+  //
+  const MILESTONES = [
+    // === Lifetime gekauft (Vision 1000) ===
+    { metric: 'lifetimeBought', threshold: 100,  icon: '💯', headline: '100 WEs gekauft', customText: '' },
+    { metric: 'lifetimeBought', threshold: 250,  icon: '🚀', headline: '250 WEs gekauft', customText: '' },
+    { metric: 'lifetimeBought', threshold: 500,  icon: '👑', headline: 'Halbzeit zur Vision', customText: '' },
+    { metric: 'lifetimeBought', threshold: 1000, icon: '🏆', headline: 'VISION 1000 ERREICHT', customText: '' },
+
+    // === Lifetime verkauft ===
+    { metric: 'lifetimeSold', threshold: 50,  icon: '🎯', headline: '50 WEs verkauft', customText: '' },
+    { metric: 'lifetimeSold', threshold: 100, icon: '🎯', headline: '100 WEs verkauft', customText: '' },
+
+    // === Verkauf 2026 in Euro ===
+    { metric: 'sold2026Revenue', threshold:  5_000_000, icon: '🔥', headline: '5 Mio € Verkauf 2026', customText: '' },
+    { metric: 'sold2026Revenue', threshold: 10_000_000, icon: '💎', headline: '10 Mio € geknackt',     customText: '' },
+    { metric: 'sold2026Revenue', threshold: 20_000_000, icon: '🌟', headline: '20 Mio € Verkauf 2026', customText: '' },
+    { metric: 'sold2026Revenue', threshold: 36_000_000, icon: '🏁', headline: 'Jahresziel Verkauf!',    customText: '' },
+
+    // === Einkauf 2026 GIK ===
+    { metric: 'einkauf2026Gik', threshold: 10_000_000, icon: '🏗️', headline: '10 Mio € investiert', customText: '' },
+    { metric: 'einkauf2026Gik', threshold: 32_000_000, icon: '🚧', headline: 'Jahresziel Einkauf!',  customText: '' },
+
+    // === Verkauf 2026 Anzahl Notartermine ===
+    { metric: 'sold2026Count', threshold:  50, icon: '📌', headline: '50 Notartermine 2026',  customText: '' },
+    { metric: 'sold2026Count', threshold: 100, icon: '📌', headline: '100 Notartermine 2026', customText: '' },
+    { metric: 'sold2026Count', threshold: 180, icon: '🏁', headline: 'Jahresziel Einheiten!', customText: '' },
+  ];
+  //
+  // Beispiel mit Bild & Spruch (zum Kopieren-Anpassen):
+  // { metric: 'sold2026Revenue', threshold: 10_000_000,
+  //   imageUrl: 'https://media.tenor.com/IRABNzkv2DkAAAAd/champagne-celebrate.gif',
+  //   headline: '10 Millionen!',
+  //   customText: 'Holzfäller-Witz: Wer hat den Wald aus? Wir, mit 10 Millionen Umsatz.' },
+  //
+  const MILESTONE_STATE_KEY = 'bb-cockpit-milestones-reached';
+
+  function readReachedMilestones() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(MILESTONE_STATE_KEY) || '[]'));
+    } catch (e) { return new Set(); }
+  }
+  function persistReachedMilestones(set) {
+    try {
+      localStorage.setItem(MILESTONE_STATE_KEY, JSON.stringify(Array.from(set)));
+    } catch (e) {}
+  }
+  function milestoneId(m) { return `${m.metric}:${m.threshold}`; }
+
+  function getMetricValue(metrics, metricName) {
+    if (!metrics) return 0;
+    const lt = metrics.lifetime || {};
+    const y  = metrics.year2026 || {};
+    const e  = metrics.einkauf2026 || {};
+    switch (metricName) {
+      case 'lifetimeBought':  return lt.bought       || 0;
+      case 'lifetimeSold':    return lt.sold         || 0;
+      case 'lifetimeRevenue': return lt.soldVolume   || 0;
+      case 'sold2026Count':   return y.sold          || 0;
+      case 'sold2026Revenue': return y.revenue       || 0;
+      case 'einkauf2026Gik':  return e.gik           || 0;
+      case 'einkauf2026We':   return e.we            || 0;
+      default: return 0;
+    }
+  }
+
+  function checkMilestones(metrics) {
+    const reached = readReachedMilestones();
+    const isFirstRun = reached.size === 0 && !localStorage.getItem(MILESTONE_STATE_KEY);
+
+    // Beim ersten Lauf: alle bereits erreichten Schwellwerte stillschweigend markieren,
+    // damit nicht 10 Pop-ups beim ersten Aufruf erscheinen.
+    if (isFirstRun) {
+      MILESTONES.forEach(m => {
+        if (getMetricValue(metrics, m.metric) >= m.threshold) {
+          reached.add(milestoneId(m));
+        }
+      });
+      persistReachedMilestones(reached);
+      return;
+    }
+
+    // Suche den ersten neu erreichten Meilenstein (in der Reihenfolge der MILESTONES-Liste)
+    for (const m of MILESTONES) {
+      const id = milestoneId(m);
+      if (reached.has(id)) continue;
+      if (getMetricValue(metrics, m.metric) >= m.threshold) {
+        showMilestone(m);
+        reached.add(id);
+        persistReachedMilestones(reached);
+        return;  // nur einer pro Refresh-Cycle, sonst Stau
+      }
+    }
+  }
+
+  function showMilestone(m) {
+    const overlay  = document.getElementById('milestoneOverlay');
+    const visual   = document.getElementById('milestoneVisual');
+    const headline = document.getElementById('milestoneHeadline');
+    const custom   = document.getElementById('milestoneCustom');
+    if (!overlay) return;
+
+    // Visual: Bild ODER Emoji
+    if (m.imageUrl) {
+      visual.outerHTML = `<img id="milestoneVisual" class="milestone-image" src="${escapeHtml(m.imageUrl)}" alt="" />`;
+    } else {
+      // Falls zuvor ein img drin war → zurück zu div
+      if (visual.tagName === 'IMG') {
+        visual.outerHTML = `<div id="milestoneVisual" class="milestone-icon">${escapeHtml(m.icon || '🏆')}</div>`;
+      } else {
+        visual.textContent = m.icon || '🏆';
+      }
+    }
+
+    headline.textContent = m.headline || 'Meilenstein erreicht';
+    custom.textContent   = m.customText || '';
+
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    // Konfetti dazu — schön viel
+    spawnConfetti(200);
+
+    // 10 Sek anzeigen, dann fade out
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+    }, 10000);
+  }
+
+  // Debug-Trigger: 3x "M" drücken zeigt eine Test-Meilenstein-Animation
+  (function() {
+    let last = 0, count = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'm' && e.key !== 'M') return;
+      const now = Date.now();
+      if (now - last > 1500) count = 0;
+      count++; last = now;
+      if (count >= 3) {
+        count = 0;
+        showMilestone({
+          icon: '🏆',
+          headline: 'Test-Meilenstein',
+          customText: '(So sieht es aus, wenn ein Schwellwert geknackt wird)',
+        });
+      }
+    });
+  })();
+
+  // Optionaler Reset-Hotkey für Meilensteine: 4x "X" — setzt alle reached-Markierungen zurück
+  (function() {
+    let last = 0, count = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'x' && e.key !== 'X') return;
+      const now = Date.now();
+      if (now - last > 1500) count = 0;
+      count++; last = now;
+      if (count >= 4) {
+        count = 0;
+        if (confirm('Alle Meilenstein-Markierungen zurücksetzen? Beim nächsten Refresh werden alle erreichten Schwellwerte erneut gefeiert.')) {
+          localStorage.removeItem(MILESTONE_STATE_KEY);
+          alert('Meilenstein-Markierungen gelöscht. Beim nächsten Live-Refresh werden bereits erreichte Schwellwerte gefeiert.');
+        }
+      }
+    });
+  })();
 </script>
 
 </body>
