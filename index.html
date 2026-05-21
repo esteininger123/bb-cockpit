@@ -816,7 +816,7 @@
       <div class="brand-mark">B&amp;B</div>
       <div class="brand-text">
         <div class="title">B&amp;B Immo Cockpit</div>
-        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-meilenstein</div>
+        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-henry</div>
       </div>
     </div>
     <div class="clock">
@@ -2335,6 +2335,70 @@
           localStorage.removeItem(MILESTONE_STATE_KEY);
           alert('Meilenstein-Markierungen gelöscht. Beim nächsten Live-Refresh werden bereits erreichte Schwellwerte gefeiert.');
         }
+      }
+    });
+  })();
+
+  // ====== Easter Eggs (regelmäßige Spaß-Einspielungen) ======
+  //
+  // Easter Eggs sind ZEIT-getriggerte Pop-ups (im Gegensatz zu Meilensteinen, die schwellwert-getriggert sind).
+  // Alle EASTER_EGG_INTERVAL_MIN Minuten wird zufällig ein Eintrag aus EASTER_EGGS angezeigt.
+  // Test-Hotkey: 3x "H" zeigt das erste Easter Egg (z.B. Henry).
+  //
+  const EASTER_EGGS = [
+    {
+      id: 'henry',
+      label: 'Botschaft',
+      headline: 'Henry, hör zu',
+      icon: '🪙',                          // Fallback wenn imageUrl nicht da ist
+      imageUrl: 'henry.jpg',               // Edgar: Datei henry.jpg muss im Cockpit-Ordner liegen
+      customText: 'Je mehr Tokens, desto besser.  #Tokens #Tokens #Tokens',
+    },
+    // Weitere Easter Eggs kannst du hier ergänzen:
+    // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...' },
+  ];
+
+  const EASTER_EGG_INTERVAL_MIN = 30;   // alle 30 Min wird ein zufälliges Easter Egg gezeigt
+
+  function showEasterEgg(egg) {
+    if (!egg) return;
+    showMilestone({
+      icon: egg.icon || '🎉',
+      imageUrl: egg.imageUrl,
+      headline: egg.headline || '',
+      customText: egg.customText || '',
+    });
+    // Label oben über der Headline überschreiben (statt "MEILENSTEIN ERREICHT")
+    const labelEl = document.querySelector('#milestoneOverlay .milestone-label');
+    if (labelEl && egg.label) labelEl.textContent = egg.label;
+  }
+
+  function pickRandomEasterEgg() {
+    if (!EASTER_EGGS || EASTER_EGGS.length === 0) return null;
+    return EASTER_EGGS[Math.floor(Math.random() * EASTER_EGGS.length)];
+  }
+
+  // Auto-Cycle: alle 30 Min
+  if (EASTER_EGG_INTERVAL_MIN > 0) {
+    setInterval(() => {
+      // Nicht zeigen wenn gerade ein anderes Overlay sichtbar ist
+      const overlay = document.getElementById('milestoneOverlay');
+      if (overlay && overlay.classList.contains('show')) return;
+      showEasterEgg(pickRandomEasterEgg());
+    }, EASTER_EGG_INTERVAL_MIN * 60 * 1000);
+  }
+
+  // Debug-Trigger: 3x "H" zeigt das erste Easter Egg (Henry)
+  (function() {
+    let last = 0, count = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'h' && e.key !== 'H') return;
+      const now = Date.now();
+      if (now - last > 1500) count = 0;
+      count++; last = now;
+      if (count >= 3) {
+        count = 0;
+        showEasterEgg(EASTER_EGGS[0]);
       }
     });
   })();
