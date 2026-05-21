@@ -1617,6 +1617,7 @@
     MOCK.lastSale  = metrics.lastSale;
     MOCK.visionTarget = metrics.visionTarget;
     render();
+    checkAndCelebrateSale(metrics.lastSale);  // Konfetti+Banner wenn neuer Verkauf erkannt
     updateYearProgress();  // Pipeline-Hinweis im Verkauf 2026 mit aktuellen Live-Werten
     // Diagnose-Overlay füllen
     if (metrics._diagnostics) {
