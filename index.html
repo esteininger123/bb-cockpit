@@ -1958,6 +1958,108 @@
       }
     });
   })();
+
+  // ====== Highlight-Ticker (News-Crawler unten) ======
+  // Sprüche/Slogans — Edgar kann hier frei ergänzen oder ersetzen
+  const TICKER_SLOGANS = [
+    'Brot & Butter. Jeden Tag. Vision 1000.',
+    'Lieber fünf mal verkaufen für 200k als ein mal für eine Million.',
+    'Wir fiebern jeden Tag.',
+    'Von Schutterwald aus deutschlandweit.',
+    'Kein Hektar Boden zu klein — keine Vision zu groß.',
+  ];
+
+  function buildTickerItems() {
+    const items = [];
+    const todayISO = new Date().toISOString().slice(0, 10);
+
+    // 1) Heute notariell verkauft?
+    const ls = MOCK.lastSale;
+    if (ls && ls.whenISO === todayISO) {
+      const what = [(ls.short || ''), (ls.what || '')].filter(Boolean).join(' · ');
+      const priceTxt = ls.price ? ' · ' + eur(ls.price) : '';
+      items.push({ type: 'live', prefix: 'Heute', text: `Notariell verkauft: ${ls.who || 'Käufer'} · ${what}${priceTxt}` });
+    }
+
+    // 2) Letzter Verkauf (wenn nicht heute, sondern davor — zeigt "Vor X Tagen")
+    if (ls && ls.whenISO !== todayISO && ls.whenISO) {
+      const ago = timeAgo(ls.whenISO);
+      const what = [(ls.short || ''), (ls.what || '')].filter(Boolean).join(' · ');
+      items.push({ type: 'normal', prefix: 'Letzter Verkauf', text: `${ls.who || 'Käufer'} · ${what} · ${ago}` });
+    }
+
+    // 3) Vision-1000-Stand
+    const bought = (MOCK.lifetime && MOCK.lifetime.bought) || 0;
+    const target = MOCK.visionTarget || 1000;
+    if (bought > 0) {
+      const pct = ((bought / target) * 100).toFixed(1).replace('.', ',');
+      items.push({ type: 'normal', prefix: 'Vision 1000', text: `${bought} von ${target} WEs · ${pct} % geschafft` });
+    }
+
+    // 4) Verkauf 2026
+    const y = MOCK.year2026 || {};
+    if (y.sold) {
+      items.push({ type: 'normal', prefix: 'Verkauf 2026', text: `${y.sold} von ${y.targetSold || '—'} Notarterminen · ${eur(y.revenue || 0)} Umsatz` });
+    }
+
+    // 5) Einkauf 2026
+    const e = MOCK.einkauf2026 || {};
+    if (e.gik) {
+      const tgt = e.targetGIK || 32_000_000;
+      items.push({ type: 'normal', prefix: 'Einkauf 2026', text: `${eur(e.gik)} GIK von ${eur(tgt)} Jahresziel · ${e.we || 0} WEs neu im Bestand` });
+    }
+
+    // 6) Nächster Notartermin
+    if (y.upcoming && y.upcoming.length > 0) {
+      const next = y.upcoming[0];
+      if (next && next.date) {
+        const what = [(next.short || ''), (next.what || '')].filter(Boolean).join(' · ');
+        items.push({ type: 'normal', prefix: 'Coming Up', text: `Nächster Notartermin am ${formatDateShort(next.date)} · ${what}` });
+      }
+    }
+
+    // 7) Bestand
+    if (MOCK._diagnostics && MOCK._diagnostics.bestand) {
+      items.push({ type: 'normal', prefix: 'Bestand', text: `${MOCK._diagnostics.bestand} Wohneinheiten aktuell im Portfolio` });
+    }
+
+    // 8) Slogans als Würze dazwischen
+    TICKER_SLOGANS.forEach(slogan => {
+      items.push({ type: 'spruch', prefix: 'B&B', text: slogan });
+    });
+
+    return items;
+  }
+
+  function formatDateShort(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (e) { return iso; }
+  }
+
+  function rebuildHighlightTicker() {
+    const track = document.getElementById('tickerTrack');
+    if (!track) return;
+    const items = buildTickerItems();
+    // Doppeln für sanften endlosen Loop
+    const html = items.concat(items).map(it => {
+      const cls = 'ticker-item ' + (it.type || 'normal');
+      return `<span class="${cls}"><span class="prefix">${escapeHtml(it.prefix)}</span>${escapeHtml(it.text)}</span><span class="ticker-item sep">◆</span>`;
+    }).join('');
+    track.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Beim Boot/DOMContentLoaded auch einmal Ticker aufbauen (für Demo-Mode)
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(rebuildHighlightTicker, 300);
+  });
 </script>
 
 </body>
