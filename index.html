@@ -700,6 +700,85 @@
   }
   .ticker-item.spruch { color: var(--text); font-style: italic; }
   .ticker-item.spruch .prefix { background: rgba(212, 167, 64, 0.25); color: var(--gold); }
+
+  /* ====== Milestone Overlay (Vollbild-Feier) ====== */
+  #milestoneOverlay {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(212, 167, 64, 0.20) 0%, rgba(7, 9, 15, 0.85) 60%);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9700;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+  }
+  #milestoneOverlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .milestone-card {
+    text-align: center;
+    max-width: 80vw;
+    padding: 60px 80px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, rgba(212, 167, 64, 0.18) 0%, rgba(212, 167, 64, 0.06) 100%);
+    border: 2px solid rgba(212, 167, 64, 0.4);
+    box-shadow:
+      0 30px 100px rgba(212, 167, 64, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 200px rgba(245, 199, 87, 0.3);
+    transform: scale(0.6);
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #milestoneOverlay.show .milestone-card { transform: scale(1); }
+
+  .milestone-icon {
+    font-size: 200px;
+    line-height: 1;
+    animation: milestone-bounce 1.4s ease-in-out infinite;
+    display: inline-block;
+    filter: drop-shadow(0 8px 24px rgba(245, 199, 87, 0.6));
+  }
+  @keyframes milestone-bounce {
+    0%, 100% { transform: translateY(0)    scale(1); }
+    25%      { transform: translateY(-30px) scale(1.08) rotate(-4deg); }
+    50%      { transform: translateY(0)    scale(0.95); }
+    75%      { transform: translateY(-15px) scale(1.04) rotate(4deg); }
+  }
+  .milestone-image {
+    max-width: 360px;
+    max-height: 320px;
+    animation: milestone-bounce 1.4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 24px rgba(245, 199, 87, 0.6));
+    border-radius: 16px;
+  }
+
+  .milestone-label {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-top: 32px;
+  }
+  .milestone-headline {
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--text);
+    margin-top: 16px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-shadow: 0 4px 24px rgba(245, 199, 87, 0.4);
+  }
+  .milestone-custom {
+    font-size: 28px;
+    color: var(--text-dim);
+    margin-top: 28px;
+    font-style: italic;
+    line-height: 1.4;
+  }
+  .milestone-custom:empty { display: none; }
 </style>
 </head>
 <body>
@@ -717,6 +796,16 @@
 <!-- Highlight-Ticker (Lauftext unten) -->
 <div id="highlightTicker">
   <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- Milestone Overlay (Vollbild-Feier) -->
+<div id="milestoneOverlay" aria-hidden="true">
+  <div class="milestone-card">
+    <div id="milestoneVisual" class="milestone-icon">🏆</div>
+    <div class="milestone-label">Meilenstein erreicht</div>
+    <div class="milestone-headline" id="milestoneHeadline">—</div>
+    <div class="milestone-custom" id="milestoneCustom"></div>
+  </div>
 </div>
 
 <div class="stage">
