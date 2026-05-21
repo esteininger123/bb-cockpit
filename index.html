@@ -644,6 +644,62 @@
     font-size: 60px; font-weight: 900; margin-top: 22px;
     font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
   }
+
+  /* ====== Highlight-Ticker (News-Crawler unten) ====== */
+  #highlightTicker {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 38px;
+    background: linear-gradient(180deg, rgba(7,9,15,0) 0%, rgba(212, 167, 64, 0.10) 60%, rgba(212, 167, 64, 0.20) 100%);
+    border-top: 1px solid rgba(212, 167, 64, 0.25);
+    overflow: hidden;
+    z-index: 200;
+    backdrop-filter: blur(8px);
+  }
+  .ticker-track {
+    display: inline-flex;
+    white-space: nowrap;
+    height: 100%;
+    align-items: center;
+    padding-left: 100%;
+    animation: ticker-slide 110s linear infinite;
+    will-change: transform;
+  }
+  @keyframes ticker-slide {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    color: var(--text-dim);
+    padding: 0 28px;
+    letter-spacing: 0.04em;
+  }
+  .ticker-item .prefix {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--bg-0);
+    font-weight: 800;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-right: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .ticker-item .sep {
+    color: var(--gold);
+    opacity: 0.35;
+    margin: 0 0 0 28px;
+    font-size: 18px;
+  }
+  .ticker-item.live .prefix {
+    background: var(--green);
+    color: var(--bg-0);
+  }
+  .ticker-item.spruch { color: var(--text); font-style: italic; }
+  .ticker-item.spruch .prefix { background: rgba(212, 167, 64, 0.25); color: var(--gold); }
 </style>
 </head>
 <body>
@@ -656,6 +712,11 @@
   <div class="who" id="saleBannerWho">—</div>
   <div class="what" id="saleBannerWhat">—</div>
   <div class="price" id="saleBannerPrice">—</div>
+</div>
+
+<!-- Highlight-Ticker (Lauftext unten) -->
+<div id="highlightTicker">
+  <div class="ticker-track" id="tickerTrack"></div>
 </div>
 
 <div class="stage">
@@ -1618,6 +1679,7 @@
     MOCK.visionTarget = metrics.visionTarget;
     render();
     checkAndCelebrateSale(metrics.lastSale);  // Konfetti+Banner wenn neuer Verkauf erkannt
+    rebuildHighlightTicker();                  // Lauftext unten mit frischen Daten
     updateYearProgress();  // Pipeline-Hinweis im Verkauf 2026 mit aktuellen Live-Werten
     // Diagnose-Overlay füllen
     if (metrics._diagnostics) {
