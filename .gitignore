@@ -1,0 +1,13 @@
+# B&B Cockpit — was geht ins öffentliche GitHub-Repo
+
+# Standard: alles ignorieren
+*
+
+# Diese Dateien werden gepusht (für FireTV-Anzeige)
+!.gitignore
+!README.md
+!index.html
+!vercel.json
+
+# macOS-Müll explizit raus
+.DS_Store
