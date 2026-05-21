@@ -816,7 +816,7 @@
       <div class="brand-mark">B&amp;B</div>
       <div class="brand-text">
         <div class="title">B&amp;B Immo Cockpit</div>
-        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-henry2</div>
+        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-attila</div>
       </div>
     </div>
     <div class="clock">
@@ -2407,35 +2407,50 @@
     if (labelEl && egg.label) labelEl.textContent = egg.label;
   }
 
-  function pickRandomEasterEgg() {
-    if (!EASTER_EGGS || EASTER_EGGS.length === 0) return null;
-    return EASTER_EGGS[Math.floor(Math.random() * EASTER_EGGS.length)];
+  function isEasterEggActiveToday(egg) {
+    if (!egg) return false;
+    const todayISO = new Date().toISOString().slice(0, 10);
+    if (egg.activeDate  && egg.activeDate  !== todayISO) return false;
+    if (egg.activeFrom  && todayISO < egg.activeFrom)    return false;
+    if (egg.activeUntil && todayISO > egg.activeUntil)   return false;
+    return true;
   }
 
-  // Auto-Cycle: alle 30 Min
+  function getActiveEasterEggs() {
+    return (EASTER_EGGS || []).filter(isEasterEggActiveToday);
+  }
+
+  function pickRandomEasterEgg() {
+    const active = getActiveEasterEggs();
+    if (active.length === 0) return null;
+    return active[Math.floor(Math.random() * active.length)];
+  }
+
+  // Auto-Cycle
   if (EASTER_EGG_INTERVAL_MIN > 0) {
     setInterval(() => {
       // Nicht zeigen wenn gerade ein anderes Overlay sichtbar ist
       const overlay = document.getElementById('milestoneOverlay');
       if (overlay && overlay.classList.contains('show')) return;
-      showEasterEgg(pickRandomEasterEgg());
+      const egg = pickRandomEasterEgg();
+      if (egg) showEasterEgg(egg);
     }, EASTER_EGG_INTERVAL_MIN * 60 * 1000);
   }
 
-  // Debug-Trigger: 3x "H" zeigt das erste Easter Egg (Henry)
-  (function() {
-    let last = 0, count = 0;
+  // Debug-Trigger: 3x "H" zeigt Henry (egal welches Datum)
+  function findEasterEggById(id) { return (EASTER_EGGS || []).find(e => e.id === id); }
+  function triggerHotkey(key, count, action) {
+    let last = 0, c = 0;
     document.addEventListener('keydown', (e) => {
-      if (e.key !== 'h' && e.key !== 'H') return;
+      if (e.key !== key && e.key !== key.toUpperCase()) return;
       const now = Date.now();
-      if (now - last > 1500) count = 0;
-      count++; last = now;
-      if (count >= 3) {
-        count = 0;
-        showEasterEgg(EASTER_EGGS[0]);
-      }
+      if (now - last > 1500) c = 0;
+      c++; last = now;
+      if (c >= count) { c = 0; action(); }
     });
-  })();
+  }
+  triggerHotkey('h', 3, () => { const egg = findEasterEggById('henry');  if (egg) showEasterEgg(egg); });
+  triggerHotkey('a', 3, () => { const egg = findEasterEggById('attila'); if (egg) showEasterEgg(egg); });
 </script>
 
 </body>
