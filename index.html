@@ -2052,11 +2052,16 @@
   // ====== Highlight-Ticker (News-Crawler unten) ======
   // Sprüche/Slogans — Edgar kann hier frei ergänzen oder ersetzen
   const TICKER_SLOGANS = [
-    'Brot & Butter. Jeden Tag. Vision 1000.',
-    'Lieber fünf mal verkaufen für 200k als ein mal für eine Million.',
-    'Wir fiebern jeden Tag.',
-    'Von Schutterwald aus deutschlandweit.',
-    'Kein Hektar Boden zu klein — keine Vision zu groß.',
+    'Vision 1000 — bis wir tausend Wohneinheiten haben. Schritt für Schritt.',
+    'Brot & Butter. Lieber konstant liefern als spektakulär scheitern.',
+    'Lieber fünf mal verkaufen für 200.000 als ein mal für eine Million.',
+    'Eine Wohneinheit pro Tag, drei Jahre lang. Das ist Vision 1000.',
+    '1000 Wohneinheiten heißt: 1000 Familien mit einem Zuhause.',
+    'Aus Schutterwald für ganz Deutschland.',
+    'Wir bauen kein Imperium. Wir bauen Brot & Butter.',
+    'Klein anfangen. Konstant bleiben. Vision 1000 erreichen.',
+    'Wir fiebern. Wir liefern. Wir wachsen — Wohneinheit für Wohneinheit.',
+    'Heute Brot & Butter. Morgen Vision 1000.',
   ];
 
   function buildTickerItems() {
@@ -2352,8 +2357,15 @@
   // ====== Easter Eggs (regelmäßige Spaß-Einspielungen) ======
   //
   // Easter Eggs sind ZEIT-getriggerte Pop-ups (im Gegensatz zu Meilensteinen, die schwellwert-getriggert sind).
-  // Alle EASTER_EGG_INTERVAL_MIN Minuten wird zufällig ein Eintrag aus EASTER_EGGS angezeigt.
-  // Test-Hotkey: 3x "H" zeigt das erste Easter Egg (z.B. Henry).
+  // Alle EASTER_EGG_INTERVAL_MIN Minuten wird ein zufälliges aktives Easter Egg angezeigt.
+  //
+  // Optionale Datums-Filter (Format: 'YYYY-MM-DD'):
+  //   - activeDate:  nur an genau diesem Datum aktiv
+  //   - activeFrom:  aktiv ab diesem Datum (inkl.)
+  //   - activeUntil: aktiv bis einschließlich diesem Datum
+  //   - keine Angabe = immer aktiv
+  //
+  // Test-Hotkey: 3x "H" zeigt Henry, 3x "A" zeigt Attila (auch außerhalb des aktiven Datums).
   //
   const EASTER_EGGS = [
     {
@@ -2361,15 +2373,26 @@
       label: 'Botschaft',
       headline: '',                          // leer = keine Headline, nur Bild + Spruch
       icon: '🪙',                            // Fallback wenn imageUrl nicht da ist
-      imageUrl: 'henry.png',                 // Edgar: Datei henry.png liegt im Cockpit-Ordner
+      imageUrl: 'henry.png',
       customText: 'Je mehr Tokens, desto besser #Tokens #Tokens #Tokens',
       durationMs: 15000,                     // 15 Sek anzeigen
+      activeUntil: '2026-05-22',             // läuft heute den ganzen Tag, morgen aus
+    },
+    {
+      id: 'attila',
+      label: 'Ankündigung',
+      headline: '',                          // leer = keine Headline, nur Bild + Spruch
+      icon: '🎁',
+      imageUrl: 'attila.png',
+      customText: 'Attila Dietzmann: bei 10 Millionen Verkaufsvolumen gibt es eine Überraschung — freut euch drauf!',
+      durationMs: 15000,
+      activeDate: '2026-05-26',              // nur am Dienstag 26.05.2026
     },
     // Weitere Easter Eggs kannst du hier ergänzen:
-    // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000 },
+    // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000, activeDate: 'YYYY-MM-DD' },
   ];
 
-  const EASTER_EGG_INTERVAL_MIN = 1;    // alle 1 Min wird ein zufälliges Easter Egg gezeigt (zum Testen — später auf 30 stellen)
+  const EASTER_EGG_INTERVAL_MIN = 1;    // alle 1 Min wird ein zufälliges Easter Egg gezeigt
 
   function showEasterEgg(egg) {
     if (!egg) return;
