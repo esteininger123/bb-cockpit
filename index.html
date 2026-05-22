@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=1920, initial-scale=1, user-scalable=no" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -2004,6 +2004,9 @@
   function boot() {
     autoScale();                         // sofort beim Laden
     window.addEventListener('resize', autoScale);
+    window.addEventListener('load', autoScale);
+    setTimeout(autoScale, 200);          // Fallback wenn Silk verzögert layoutet
+    setTimeout(autoScale, 800);          // 2. Fallback
     updateClock();
     updateYearProgress();
     render();   // initialer Demo-Render
