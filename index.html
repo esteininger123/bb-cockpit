@@ -781,36 +781,48 @@
   .milestone-custom:empty { display: none; }
 
   /* ====== Verrückte Effekte: fliegende Emojis (Geschenke, Tokens, …) ====== */
+  /* z-index 99999 = ÜBER allem (auch Milestone-Overlay) → kommen in den Vordergrund */
   .flying-emoji {
     position: fixed;
     pointer-events: none;
-    z-index: 9600;
+    z-index: 99999;
     will-change: transform, opacity;
     user-select: none;
     line-height: 1;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.55))
+            drop-shadow(0 0 28px rgba(245, 199, 87, 0.45));
   }
-  /* Geschenke fliegen von einer Seite zur anderen, drehen sich, bewegen sich auf einer Bahn */
+  /* Geschenke fliegen quer durch den Bildschirm — wachsen dabei von klein (hinten) auf riesig (vorn) */
   @keyframes flying-gift-from-left {
-    0%   { transform: translate3d(-200px, 0, 0) rotate(0deg);                opacity: 0; }
-    8%   { opacity: 1; }
-    100% { transform: translate3d(110vw,  var(--ty, 0px), 0) rotate(720deg); opacity: 0.6; }
+    0%   { transform: translate3d(-150px, 0, 0)            scale(0.25) rotate(0deg);    opacity: 0; }
+    12%  { transform: translate3d(8vw,    var(--ty, 0px), 0) scale(0.9)  rotate(80deg);   opacity: 1; }
+    65%  { transform: translate3d(55vw,   var(--ty, 0px), 0) scale(2.6)  rotate(420deg);  opacity: 1; }
+    100% { transform: translate3d(115vw,  var(--ty, 0px), 0) scale(3.2)  rotate(720deg);  opacity: 0; }
   }
   @keyframes flying-gift-from-right {
-    0%   { transform: translate3d(200px,  0, 0) rotate(0deg);                opacity: 0; }
-    8%   { opacity: 1; }
-    100% { transform: translate3d(-110vw, var(--ty, 0px), 0) rotate(-720deg); opacity: 0.6; }
+    0%   { transform: translate3d(150px,  0, 0)             scale(0.25) rotate(0deg);     opacity: 0; }
+    12%  { transform: translate3d(-8vw,   var(--ty, 0px), 0) scale(0.9)  rotate(-80deg);   opacity: 1; }
+    65%  { transform: translate3d(-55vw,  var(--ty, 0px), 0) scale(2.6)  rotate(-420deg);  opacity: 1; }
+    100% { transform: translate3d(-115vw, var(--ty, 0px), 0) scale(3.2)  rotate(-720deg);  opacity: 0; }
   }
   @keyframes flying-gift-from-top {
-    0%   { transform: translate3d(0, -200px, 0) rotate(0deg);                opacity: 0; }
-    8%   { opacity: 1; }
-    100% { transform: translate3d(var(--tx, 0px), 110vh, 0) rotate(720deg);   opacity: 0.6; }
+    0%   { transform: translate3d(0, -150px, 0)             scale(0.25) rotate(0deg);     opacity: 0; }
+    12%  { transform: translate3d(var(--tx, 0px), 10vh, 0)   scale(0.9)  rotate(80deg);    opacity: 1; }
+    65%  { transform: translate3d(var(--tx, 0px), 65vh, 0)   scale(2.6)  rotate(420deg);   opacity: 1; }
+    100% { transform: translate3d(var(--tx, 0px), 115vh, 0)  scale(3.2)  rotate(720deg);   opacity: 0; }
   }
-  /* Token-Explosion: aus der Mitte radial nach außen */
+  @keyframes flying-gift-from-bottom {
+    0%   { transform: translate3d(0, 150px, 0)              scale(0.25) rotate(0deg);     opacity: 0; }
+    12%  { transform: translate3d(var(--tx, 0px), -10vh, 0)  scale(0.9)  rotate(-80deg);   opacity: 1; }
+    65%  { transform: translate3d(var(--tx, 0px), -65vh, 0)  scale(2.6)  rotate(-420deg);  opacity: 1; }
+    100% { transform: translate3d(var(--tx, 0px), -115vh, 0) scale(3.2)  rotate(-720deg);  opacity: 0; }
+  }
+  /* Token-Explosion: aus der Mitte mit massivem Wachstum nach außen */
   @keyframes shoot-token {
-    0%   { transform: translate3d(0, 0, 0) rotate(0deg)   scale(0.5); opacity: 0; }
-    10%  { transform: translate3d(0, 0, 0) rotate(60deg)  scale(1.4); opacity: 1; }
-    100% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) rotate(1080deg) scale(0.8); opacity: 0; }
+    0%   { transform: translate3d(0, 0, 0)                            scale(0.15) rotate(0deg);    opacity: 0; }
+    15%  { transform: translate3d(calc(var(--tx, 0px) * 0.1), calc(var(--ty, 0px) * 0.1), 0) scale(2.4)  rotate(180deg);  opacity: 1; }
+    60%  { transform: translate3d(calc(var(--tx, 0px) * 0.6), calc(var(--ty, 0px) * 0.6), 0) scale(3.4)  rotate(720deg);  opacity: 1; }
+    100% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0)               scale(4.0)  rotate(1080deg); opacity: 0; }
   }
 </style>
 </head>
