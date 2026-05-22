@@ -2443,20 +2443,29 @@
 
   function showEasterEgg(egg) {
     if (!egg) return;
+    // Phase 1: ruhig — nur Bild + Spruch anzeigen, KEINE Effekte
     showMilestone({
       icon: egg.icon || '🎉',
       imageUrl: egg.imageUrl,
       headline: egg.headline || '',
       customText: egg.customText || '',
       durationMs: egg.durationMs,
+      silentStart: true,                        // ← kein Konfetti beim Start
     });
     // Label oben über der Headline überschreiben (statt "MEILENSTEIN ERREICHT")
     const labelEl = document.querySelector('#milestoneOverlay .milestone-label');
     if (labelEl && egg.label) labelEl.textContent = egg.label;
 
-    // Spezial-Effekt feuern (z.B. fliegende Geschenke, schießende Tokens)
-    if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(40);
-    if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(80);
+    // Phase 2: nach Lesezeit brechen die Effekte los
+    const explosionDelay = (typeof egg.explosionDelayMs === 'number') ? egg.explosionDelayMs : 4000;
+    setTimeout(() => {
+      // Overlay muss noch sichtbar sein, sonst macht die Show keinen Sinn
+      const overlay = document.getElementById('milestoneOverlay');
+      if (!overlay || !overlay.classList.contains('show')) return;
+      spawnConfetti(180);
+      if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(40);
+      if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(80);
+    }, explosionDelay);
   }
 
   // ====== Verrückte Effekte: fliegende Emojis ======
