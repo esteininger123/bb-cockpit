@@ -505,8 +505,8 @@
   /* ====== PAT-Setup-Modal ====== */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 200;
-    background: rgba(7, 9, 15, 0.92);
-    backdrop-filter: blur(8px);
+    background: rgba(7, 9, 15, 0.95);
+    /* backdrop-filter entfernt — FireTV-GPU */
     display: none;
     align-items: center; justify-content: center;
   }
@@ -580,7 +580,7 @@
     min-width: 360px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.55);
     display: none;
-    backdrop-filter: blur(10px);
+    /* backdrop-filter entfernt — FireTV-GPU */
   }
   .diag.on { display: block; }
   .diag h3 { color: var(--gold); font-size: 13px; margin-bottom: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
@@ -749,7 +749,7 @@
     line-height: 1;
     animation: milestone-bounce 1.4s ease-in-out infinite;
     display: inline-block;
-    filter: drop-shadow(0 8px 24px rgba(245, 199, 87, 0.6));
+    /* drop-shadow entfernt — FireTV-GPU */
   }
   @keyframes milestone-bounce {
     0%, 100% { transform: translateY(0)    scale(1); }
