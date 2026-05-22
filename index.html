@@ -793,15 +793,14 @@
 
   /* ====== Verrückte Effekte: fliegende Emojis (Geschenke, Tokens, …) ====== */
   /* z-index 99999 = ÜBER allem (auch Milestone-Overlay) → kommen in den Vordergrund */
+  /* drop-shadow-Filter entfernt — FireTV-GPU crasht sonst */
   .flying-emoji {
     position: fixed;
     pointer-events: none;
     z-index: 99999;
-    will-change: transform, opacity;
+    will-change: transform;
     user-select: none;
     line-height: 1;
-    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.55))
-            drop-shadow(0 0 28px rgba(245, 199, 87, 0.45));
   }
   /* Geschenke fliegen quer durch den Bildschirm — wachsen dabei von klein (hinten) auf riesig (vorn) */
   @keyframes flying-gift-from-left {
@@ -1988,7 +1987,24 @@
   });
 
   // ----- Boot -----
+  // ====== Auto-Scale (Cockpit fit auf jeden Bildschirm) ======
+  function autoScale() {
+    const root = document.getElementById('cockpitRoot');
+    if (!root) return;
+    const designW = 1920;
+    const designH = 1080;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const scale = Math.min(vw / designW, vh / designH);
+    // Zentrieren
+    const tx = (vw - designW * scale) / 2;
+    const ty = (vh - designH * scale) / 2;
+    root.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  }
+
   function boot() {
+    autoScale();                         // sofort beim Laden
+    window.addEventListener('resize', autoScale);
     updateClock();
     updateYearProgress();
     render();   // initialer Demo-Render
