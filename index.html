@@ -861,7 +861,7 @@
       <div class="brand-mark">B&amp;B</div>
       <div class="brand-text">
         <div class="title">B&amp;B Immo Cockpit</div>
-        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-fx2</div>
+        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-drama</div>
       </div>
     </div>
     <div class="clock">
@@ -2420,9 +2420,10 @@
       icon: '🪙',
       imageUrl: 'henry.png',
       customText: 'Je mehr Tokens, desto besser #Tokens #Tokens #Tokens',
-      durationMs: 15000,
-      activeUntil: '2026-05-22',             // läuft heute den ganzen Tag, morgen aus
-      specialEffect: 'shootingTokens',        // 🪙 schießen radial aus der Mitte
+      durationMs: 18000,                      // 18 Sek total = 4s ruhig lesen + ~14s Token-Explosion
+      explosionDelayMs: 4000,                 // Lesezeit bevor Effekte losbrechen
+      activeUntil: '2026-05-22',
+      specialEffect: 'shootingTokens',
     },
     {
       id: 'attila',
@@ -2431,9 +2432,10 @@
       icon: '🎁',
       imageUrl: 'attila.png',
       customText: 'Attila Dietzmann: bei 10 Millionen Verkaufsvolumen gibt es eine Überraschung — freut euch drauf!',
-      durationMs: 15000,
-      activeDate: '2026-05-26',              // nur am Dienstag 26.05.2026
-      specialEffect: 'flyingGifts',           // 🎁 fliegen von den Seiten rein
+      durationMs: 18000,                      // 18 Sek total = 4s ruhig lesen + ~14s Geschenk-Inferno
+      explosionDelayMs: 4000,
+      activeDate: '2026-05-26',
+      specialEffect: 'flyingGifts',
     },
     // Weitere Easter Eggs kannst du hier ergänzen:
     // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000, activeDate: 'YYYY-MM-DD' },
