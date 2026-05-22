@@ -874,7 +874,7 @@
       <div class="brand-mark">B&amp;B</div>
       <div class="brand-text">
         <div class="title">B&amp;B Immo Cockpit</div>
-        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-scale</div>
+        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-firetv</div>
       </div>
     </div>
     <div class="clock">
@@ -2078,7 +2078,7 @@
     document.getElementById('saleBannerPrice').textContent = sale.price ? eur(sale.price) : '';
     banner.classList.add('show');
     banner.setAttribute('aria-hidden', 'false');
-    spawnConfetti(140);
+    spawnConfetti(50);
     // Banner 7 Sek anzeigen, dann fade out
     setTimeout(() => {
       banner.classList.remove('show');
@@ -2379,7 +2379,7 @@
     if (labelEl) labelEl.textContent = 'Meilenstein erreicht';
 
     // Konfetti nur wenn nicht silentStart (Easter Eggs steuern es selbst zeitverzögert)
-    if (!m.silentStart) spawnConfetti(200);
+    if (!m.silentStart) spawnConfetti(70);
 
     // Headline ggf. ausblenden wenn leer
     const headlineEl = document.getElementById('milestoneHeadline');
