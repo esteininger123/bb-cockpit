@@ -861,7 +861,7 @@
       <div class="brand-mark">B&amp;B</div>
       <div class="brand-text">
         <div class="title">B&amp;B Immo Cockpit</div>
-        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-fx</div>
+        <div class="subtitle" id="taglineEl">Vision 1000 · Brot &amp; Butter Live · v2026-05-22-fx2</div>
       </div>
     </div>
     <div class="clock">
@@ -2455,70 +2455,79 @@
     if (labelEl && egg.label) labelEl.textContent = egg.label;
 
     // Spezial-Effekt feuern (z.B. fliegende Geschenke, schießende Tokens)
-    if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(20);
-    if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(50);
+    if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(40);
+    if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(80);
   }
 
   // ====== Verrückte Effekte: fliegende Emojis ======
+  // Geschenke fliegen aus allen vier Richtungen, wachsen während des Flugs von klein auf riesig
   function spawnFlyingGifts(count) {
-    const emojis = ['🎁', '🎊', '🎀', '🎉'];
+    const emojis = ['🎁', '🎊', '🎀', '🎉', '🎈'];
     for (let i = 0; i < count; i++) {
       const el = document.createElement('div');
       el.className = 'flying-emoji';
       el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      const size = 60 + Math.random() * 50;
+      // Initial-Größe schon deutlich, weil scale danach noch hochschraubt
+      const size = 90 + Math.random() * 60;       // 90-150px statt vorher 60-110px
       el.style.fontSize = size + 'px';
 
-      // Spawn-Seite: 0=links, 1=rechts, 2=oben
-      const side = Math.floor(Math.random() * 3);
+      // Spawn-Seite: 0=links, 1=rechts, 2=oben, 3=unten
+      const side = Math.floor(Math.random() * 4);
       let anim;
       if (side === 0) {
         el.style.left = '0';
-        el.style.top  = (Math.random() * 100) + 'vh';
-        el.style.setProperty('--ty', (Math.random() * 400 - 200) + 'px');
+        el.style.top  = (10 + Math.random() * 80) + 'vh';
+        el.style.setProperty('--ty', (Math.random() * 300 - 150) + 'px');
         anim = 'flying-gift-from-left';
       } else if (side === 1) {
         el.style.right = '0';
-        el.style.top   = (Math.random() * 100) + 'vh';
-        el.style.setProperty('--ty', (Math.random() * 400 - 200) + 'px');
+        el.style.top   = (10 + Math.random() * 80) + 'vh';
+        el.style.setProperty('--ty', (Math.random() * 300 - 150) + 'px');
         anim = 'flying-gift-from-right';
-      } else {
-        el.style.left  = (Math.random() * 100) + 'vw';
+      } else if (side === 2) {
+        el.style.left  = (10 + Math.random() * 80) + 'vw';
         el.style.top   = '0';
-        el.style.setProperty('--tx', (Math.random() * 400 - 200) + 'px');
+        el.style.setProperty('--tx', (Math.random() * 300 - 150) + 'px');
         anim = 'flying-gift-from-top';
+      } else {
+        el.style.left  = (10 + Math.random() * 80) + 'vw';
+        el.style.bottom = '0';
+        el.style.setProperty('--tx', (Math.random() * 300 - 150) + 'px');
+        anim = 'flying-gift-from-bottom';
       }
-      const dur = (2.4 + Math.random() * 2.4);
-      el.style.animation = `${anim} ${dur}s ease-in forwards`;
-      el.style.animationDelay = (Math.random() * 3) + 's';
+      const dur = (3.0 + Math.random() * 2.5);
+      el.style.animation = `${anim} ${dur}s cubic-bezier(0.4, 0.05, 0.6, 1) forwards`;
+      el.style.animationDelay = (Math.random() * 4) + 's';
 
       document.body.appendChild(el);
-      setTimeout(() => el.remove(), (dur + 3.2) * 1000);
+      setTimeout(() => el.remove(), (dur + 4.2) * 1000);
     }
   }
 
+  // Token-Explosion: aus der Mitte, wachsen massiv beim Reinfliegen in den Vordergrund
   function spawnShootingTokens(count) {
-    const tokenEmojis = ['🪙', '💰', '🤑', '💎'];
+    const tokenEmojis = ['🪙', '💰', '🤑', '💎', '💵'];
     const cx = window.innerWidth  / 2;
     const cy = window.innerHeight / 2;
     for (let i = 0; i < count; i++) {
       const el = document.createElement('div');
       el.className = 'flying-emoji';
       el.textContent = tokenEmojis[Math.floor(Math.random() * tokenEmojis.length)];
-      const size = 40 + Math.random() * 35;
+      // Initial-Größe groß, scale macht ihn 4x — am Ende richtig riesig
+      const size = 70 + Math.random() * 50;       // 70-120px statt vorher 40-75px
       el.style.fontSize = size + 'px';
       el.style.left = (cx - size / 2) + 'px';
       el.style.top  = (cy - size / 2) + 'px';
 
-      // Radial nach außen
-      const angle    = Math.random() * 2 * Math.PI;
-      const distance = 500 + Math.random() * 900;
+      // Radial nach außen — gleichmäßig + bisschen Random
+      const angle    = ((i / count) * 2 * Math.PI) + (Math.random() * 0.4 - 0.2);
+      const distance = 600 + Math.random() * 700;
       el.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
       el.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
 
-      const dur = (1.6 + Math.random() * 1.4);
-      el.style.animation = `shoot-token ${dur}s cubic-bezier(0.2, 0.7, 0.3, 1) forwards`;
-      el.style.animationDelay = (Math.random() * 1.5) + 's';
+      const dur = (2.0 + Math.random() * 1.4);
+      el.style.animation = `shoot-token ${dur}s cubic-bezier(0.25, 0.8, 0.4, 1) forwards`;
+      el.style.animationDelay = (Math.random() * 1.2) + 's';
 
       document.body.appendChild(el);
       setTimeout(() => el.remove(), (dur + 1.8) * 1000);
