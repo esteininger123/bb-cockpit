@@ -2496,9 +2496,10 @@
       // Overlay muss noch sichtbar sein, sonst macht die Show keinen Sinn
       const overlay = document.getElementById('milestoneOverlay');
       if (!overlay || !overlay.classList.contains('show')) return;
-      spawnConfetti(180);
-      if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(40);
-      if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(80);
+      // Anzahl FireTV-gerecht reduziert — sonst crasht der Silk-Browser
+      spawnConfetti(60);
+      if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(14);
+      if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(22);
     }, explosionDelay);
   }
 
