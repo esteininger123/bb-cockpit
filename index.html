@@ -713,10 +713,10 @@
   .ticker-item.spruch .prefix { background: rgba(212, 167, 64, 0.25); color: var(--gold); }
 
   /* ====== Milestone Overlay (Vollbild-Feier) ====== */
+  /* backdrop-filter entfernt — war auf FireTV GPU-Killer */
   #milestoneOverlay {
     position: fixed; inset: 0;
-    background: radial-gradient(circle at center, rgba(212, 167, 64, 0.20) 0%, rgba(7, 9, 15, 0.85) 60%);
-    backdrop-filter: blur(8px);
+    background: radial-gradient(circle at center, rgba(212, 167, 64, 0.20) 0%, rgba(7, 9, 15, 0.92) 60%);
     display: none;
     align-items: center;
     justify-content: center;
@@ -2503,10 +2503,10 @@
       // Overlay muss noch sichtbar sein, sonst macht die Show keinen Sinn
       const overlay = document.getElementById('milestoneOverlay');
       if (!overlay || !overlay.classList.contains('show')) return;
-      // Anzahl FireTV-gerecht reduziert — sonst crasht der Silk-Browser
-      spawnConfetti(60);
-      if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(14);
-      if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(22);
+      // Anzahl noch weiter reduziert — FireTV-Performance
+      spawnConfetti(30);
+      if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(10);
+      if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(16);
     }, explosionDelay);
   }
 
