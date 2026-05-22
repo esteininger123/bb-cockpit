@@ -2346,8 +2346,8 @@
     const labelEl = document.querySelector('#milestoneOverlay .milestone-label');
     if (labelEl) labelEl.textContent = 'Meilenstein erreicht';
 
-    // Konfetti dazu — schön viel
-    spawnConfetti(200);
+    // Konfetti nur wenn nicht silentStart (Easter Eggs steuern es selbst zeitverzögert)
+    if (!m.silentStart) spawnConfetti(200);
 
     // Headline ggf. ausblenden wenn leer
     const headlineEl = document.getElementById('milestoneHeadline');
