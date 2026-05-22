@@ -657,14 +657,14 @@
   }
 
   /* ====== Highlight-Ticker (News-Crawler unten) ====== */
+  /* Im Cockpit-Wrapper — absolute statt fixed, weil Wrapper transformiert wird */
   #highlightTicker {
-    position: fixed; bottom: 0; left: 0; right: 0;
+    position: absolute; bottom: 0; left: 0; right: 0;
     height: 38px;
     background: linear-gradient(180deg, rgba(7,9,15,0) 0%, rgba(212, 167, 64, 0.10) 60%, rgba(212, 167, 64, 0.20) 100%);
     border-top: 1px solid rgba(212, 167, 64, 0.25);
     overflow: hidden;
     z-index: 200;
-    backdrop-filter: blur(8px);
   }
   .ticker-track {
     display: inline-flex;
@@ -839,7 +839,7 @@
 </head>
 <body>
 
-<!-- Sale Celebration: Konfetti-Layer + Banner -->
+<!-- Sale Celebration: Konfetti-Layer + Banner (außerhalb des Wrappers — voller Viewport) -->
 <div id="confettiContainer"></div>
 <div id="saleBanner" aria-hidden="true">
   <div class="icon">🎉</div>
@@ -849,12 +849,7 @@
   <div class="price" id="saleBannerPrice">—</div>
 </div>
 
-<!-- Highlight-Ticker (Lauftext unten) -->
-<div id="highlightTicker">
-  <div class="ticker-track" id="tickerTrack"></div>
-</div>
-
-<!-- Milestone Overlay (Vollbild-Feier) -->
+<!-- Milestone Overlay (Vollbild-Feier, außerhalb des Wrappers) -->
 <div id="milestoneOverlay" aria-hidden="true">
   <div class="milestone-card">
     <div id="milestoneVisual" class="milestone-icon">🏆</div>
@@ -862,6 +857,14 @@
     <div class="milestone-headline" id="milestoneHeadline">—</div>
     <div class="milestone-custom" id="milestoneCustom"></div>
   </div>
+</div>
+
+<!-- Cockpit-Inhalt (wird via JS auf Viewport-Größe skaliert) -->
+<div id="cockpitRoot">
+
+<!-- Highlight-Ticker (Lauftext am unteren Rand des Wrappers) -->
+<div id="highlightTicker">
+  <div class="ticker-track" id="tickerTrack"></div>
 </div>
 
 <div class="stage">
