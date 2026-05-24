@@ -783,6 +783,49 @@
   }
   .milestone-custom:empty { display: none; }
 
+  /* ====== Countdown 3-2-1 Overlay ====== */
+  /* FireTV-safe: nur transform + opacity, keine box-shadow-Animation, kein drop-shadow */
+  #countdownOverlay {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(212, 167, 64, 0.22) 0%, rgba(7, 9, 15, 0.94) 60%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9800;
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+  }
+  #countdownOverlay.show { display: flex; opacity: 1; }
+  .countdown-label {
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    text-align: center;
+    margin-bottom: 40px;
+    line-height: 1.05;
+    text-shadow: 0 4px 24px rgba(245, 199, 87, 0.45);
+  }
+  .countdown-number {
+    font-size: 360px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    text-shadow: 0 6px 32px rgba(245, 199, 87, 0.55);
+    will-change: transform, opacity;
+  }
+  .countdown-number.tick {
+    animation: countdown-pop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes countdown-pop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    20%  { transform: scale(1.15); opacity: 1; }
+    60%  { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.7); opacity: 0; }
+  }
+
   /* ====== Verrückte Effekte: fliegende Emojis (Geschenke, Tokens, …) ====== */
   /* z-index 99999 = ÜBER allem (auch Milestone-Overlay) → kommen in den Vordergrund */
   /* drop-shadow-Filter entfernt — FireTV-GPU crasht sonst */
@@ -848,6 +891,12 @@
     <div class="milestone-headline" id="milestoneHeadline">—</div>
     <div class="milestone-custom" id="milestoneCustom"></div>
   </div>
+</div>
+
+<!-- Countdown Overlay (3-2-1 vor Spezial-Botschaften) -->
+<div id="countdownOverlay" aria-hidden="true">
+  <div class="countdown-label" id="countdownLabel"></div>
+  <div class="countdown-number" id="countdownNumber">3</div>
 </div>
 
 <!-- Cockpit-Inhalt (wird via JS auf Viewport-Größe skaliert) -->
