@@ -19,5 +19,9 @@
 !assets/
 !assets/**
 
+# Pflege-Liste für Cockpit-Botschaften + Geburtstage (wird vom Cockpit live gelesen)
+# ACHTUNG: liegt damit öffentlich auf GitHub. Keine sensiblen Daten reinschreiben.
+!Cockpit-Botschaften.xlsx
+
 # macOS-Müll explizit raus
 .DS_Store
