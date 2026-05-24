@@ -2527,8 +2527,7 @@
       customText: '',
       durationMs: 14000,                      // 14s Bild-Anzeige nach dem Countdown
       explosionDelayMs: 3000,                 // 3s ruhig lesen, dann Konfetti
-      activeFrom: '2026-05-24',
-      activeUntil: '2026-06-30',
+      activeWeekday: 3,                       // 0=So, 1=Mo, 2=Di, 3=Mi → nur Mittwochs aktiv
       specialEffect: 'countdown321',          // erst 3-2-1, dann Bild
       countdownTitle: 'Unternehmens Couple of the Month',
     },
@@ -2695,10 +2694,17 @@
 
   function isEasterEggActiveToday(egg) {
     if (!egg) return false;
-    const todayISO = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const todayISO = now.toISOString().slice(0, 10);
     if (egg.activeDate  && egg.activeDate  !== todayISO) return false;
     if (egg.activeFrom  && todayISO < egg.activeFrom)    return false;
     if (egg.activeUntil && todayISO > egg.activeUntil)   return false;
+    // Wochentag-Filter (0=So, 1=Mo, ..., 6=Sa) — als Zahl oder als Array
+    if (typeof egg.activeWeekday !== 'undefined') {
+      const dow = now.getDay();
+      const allowed = Array.isArray(egg.activeWeekday) ? egg.activeWeekday : [egg.activeWeekday];
+      if (!allowed.includes(dow)) return false;
+    }
     return true;
   }
 
