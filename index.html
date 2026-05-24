@@ -2532,6 +2532,7 @@
       activeDate: '2026-05-27',               // Mittwoch — Premiere
       specialEffect: 'countdown321',
       countdownTitle: 'Unternehmens Couple of the Month',
+      followUpId: 'coupleReveal',             // direkt danach: der Reveal-Gag
     },
     {
       id: 'coupleOfTheMonth_thu',
@@ -2545,6 +2546,7 @@
       activeDate: '2026-05-28',               // Donnerstag
       specialEffect: 'countdown321',
       countdownTitle: 'Couple of the Month',
+      followUpId: 'coupleReveal',
     },
     {
       id: 'coupleOfTheMonth_fri',
@@ -2558,6 +2560,22 @@
       activeDate: '2026-05-29',               // Freitag
       specialEffect: 'countdown321',
       countdownTitle: 'Couple of the Month',
+      followUpId: 'coupleReveal',
+    },
+    // ===== Reveal-Gag: Auflösung nach Couple of the Month =====
+    // Wird NICHT im Auto-Cycle gezogen (noAutoCycle), nur über followUpId oder Hotkey 3× V
+    {
+      id: 'coupleReveal',
+      label: 'Plot Twist',
+      headline: 'Vivi & Lau',
+      icon: '💞',
+      imageUrl: 'laurin-vivi.png',            // Platzhalter — bitte echtes Bild unter diesem Namen ablegen
+      customText: 'Das wahre Couple of the Month',
+      durationMs: 14000,
+      explosionDelayMs: 3000,
+      specialEffect: 'countdown321',
+      countdownTitle: 'Es sind natürlich …',
+      noAutoCycle: true,
     },
     // Weitere Easter Eggs kannst du hier ergänzen:
     // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000, activeDate: 'YYYY-MM-DD' },
@@ -2903,6 +2921,7 @@
   triggerHotkey('h', 3, () => { const egg = findEasterEggById('henry');            if (egg) showEasterEgg(egg); });
   triggerHotkey('a', 3, () => { const egg = findEasterEggById('attila');           if (egg) showEasterEgg(egg); });
   triggerHotkey('l', 3, () => { const egg = findEasterEggById('coupleOfTheMonth'); if (egg) showEasterEgg(egg); });
+  triggerHotkey('v', 3, () => { const egg = findEasterEggById('coupleReveal');     if (egg) showEasterEgg(egg); });
 </script>
 
 </body>
