@@ -7,6 +7,8 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>B&amp;B Immo Cockpit · Vision 1000</title>
+<!-- SheetJS für das Lesen von Cockpit-Botschaften.xlsx (kleine zusätzliche Datenquelle) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   /* ====== Reset / Base ====== */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -2493,7 +2495,7 @@
   //
   // Test-Hotkey: 3x "H" zeigt Henry, 3x "A" zeigt Attila (auch außerhalb des aktiven Datums).
   //
-  const EASTER_EGGS = [
+  let EASTER_EGGS = [
     {
       id: 'henry',
       label: 'Botschaft',
