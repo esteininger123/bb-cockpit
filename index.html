@@ -2863,7 +2863,8 @@
   }
 
   function getActiveEasterEggs() {
-    return (EASTER_EGGS || []).filter(isEasterEggActiveToday);
+    // noAutoCycle-Eggs (z.B. Follow-up-Reveals) sind nur per Hotkey/followUp triggerbar, nie zufällig
+    return (EASTER_EGGS || []).filter(e => !e.noAutoCycle && isEasterEggActiveToday(e));
   }
 
   function pickRandomEasterEgg() {
@@ -2875,9 +2876,13 @@
   // Auto-Cycle
   if (EASTER_EGG_INTERVAL_MIN > 0) {
     setInterval(() => {
-      // Nicht zeigen wenn gerade ein anderes Overlay sichtbar ist
+      // Aktiver Egg-Akt läuft (z.B. Couple-of-the-Month inkl. Reveal) → nicht reinplatzen
+      if (easterEggInProgress) return;
+      // Sichtbares Overlay → auch nicht
       const overlay = document.getElementById('milestoneOverlay');
+      const cdOverlay = document.getElementById('countdownOverlay');
       if (overlay && overlay.classList.contains('show')) return;
+      if (cdOverlay && cdOverlay.classList.contains('show')) return;
       const egg = pickRandomEasterEgg();
       if (egg) showEasterEgg(egg);
     }, EASTER_EGG_INTERVAL_MIN * 60 * 1000);
