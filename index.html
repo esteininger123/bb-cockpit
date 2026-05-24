@@ -2669,14 +2669,36 @@
 
   const EASTER_EGG_INTERVAL_MIN = 1;    // alle 1 Min wird ein zufälliges Easter Egg gezeigt
 
+  // Globaler Lock: solange ein Easter Egg läuft (inkl. Follow-ups), keine neuen aus dem Auto-Cycle
+  let easterEggInProgress = false;
+
   function showEasterEgg(egg) {
     if (!egg) return;
+    easterEggInProgress = true;
     // Spezial-Intro: 3-2-1-Countdown vor der eigentlichen Anzeige
     if (egg.specialEffect === 'countdown321') {
       runCountdown321(egg.countdownTitle || egg.label || '', () => showEasterEggCore(egg));
-      return;
+    } else {
+      showEasterEggCore(egg);
     }
-    showEasterEggCore(egg);
+    scheduleAfterEgg(egg);
+  }
+
+  // Nach Ende des Eggs: Lock lösen, ggf. Follow-up triggern
+  function scheduleAfterEgg(egg) {
+    const cdMs = (egg.specialEffect === 'countdown321') ? 4700 : 0;   // 1.6s Titel + 3×0.9s + 0.22s Nachklang
+    const totalMs = cdMs + (egg.durationMs || 10000);
+    setTimeout(() => {
+      // Follow-up?
+      if (egg.followUpId) {
+        const next = findEasterEggById(egg.followUpId);
+        if (next) {
+          setTimeout(() => showEasterEgg(next), 600);   // 0.6s Atempause zwischen Akt 1 und Akt 2
+          return;
+        }
+      }
+      easterEggInProgress = false;
+    }, totalMs);
   }
 
   function showEasterEggCore(egg) {
