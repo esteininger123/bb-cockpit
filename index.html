@@ -2563,6 +2563,110 @@
     // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000, activeDate: 'YYYY-MM-DD' },
   ];
 
+  // ====== Excel-Quelle: Cockpit-Botschaften.xlsx ======
+  // Edgar pflegt Botschaften + Geburtstage in der Excel im selben Ordner.
+  // Diese Funktion lädt sie beim Cockpit-Start additiv, ohne die hartkodierten Eggs zu verwerfen.
+  // Bei JEDEM Fehler: einfach loggen, das Cockpit läuft mit den hartkodierten Eggs weiter.
+  async function loadCockpitBotschaftenFromExcel() {
+    if (typeof XLSX === 'undefined') { console.warn('[Botschaften] SheetJS nicht geladen — überspringe Excel-Import'); return; }
+    try {
+      const resp = await fetch('Cockpit-Botschaften.xlsx?ts=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) { console.info('[Botschaften] Keine Excel gefunden (' + resp.status + ') — nutze hartkodierte Liste'); return; }
+      const buf = await resp.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+
+      const added = [];
+
+      // --- Sheet "Botschaften" (einmalige Slots) ---
+      if (wb.SheetNames.includes('Botschaften')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Botschaften'], { defval: '' });
+        rows.forEach((r, i) => {
+          const aktiv = String(r['Aktiv (ja/nein)'] || '').trim().toLowerCase();
+          if (aktiv !== 'ja') return;
+          const datumRaw = r['Datum'];
+          if (!datumRaw) return;
+          const datumISO = normalizeDateToISO(datumRaw);
+          if (!datumISO) return;
+          const headline = String(r['Headline (groß, fett)'] || '').trim();
+          const spruch   = String(r['Spruch (Untertitel)']    || '').trim();
+          const bild     = String(r['Bild-Dateiname']         || '').trim();
+          const cdTitle  = String(r['Countdown-Titel']        || '').trim();
+          added.push({
+            id: 'excel-botschaft-' + i,
+            label: 'Botschaft',
+            headline: headline,
+            icon: '✨',
+            imageUrl: bild || undefined,
+            customText: spruch,
+            durationMs: 14000,
+            explosionDelayMs: 3000,
+            activeDate: datumISO,
+            specialEffect: cdTitle ? 'countdown321' : undefined,
+            countdownTitle: cdTitle || undefined,
+          });
+        });
+      }
+
+      // --- Sheet "Geburtstage" (jährlich wiederkehrend) ---
+      if (wb.SheetNames.includes('Geburtstage')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Geburtstage'], { defval: '' });
+        const heute = new Date();
+        const heuteTTMM = String(heute.getDate()).padStart(2, '0') + '.' + String(heute.getMonth() + 1).padStart(2, '0') + '.';
+        rows.forEach((r, i) => {
+          const aktiv = String(r['Aktiv (ja/nein)'] || '').trim().toLowerCase();
+          if (aktiv !== 'ja') return;
+          const ttmm = String(r['Geburtstag (TT.MM.)'] || '').trim();
+          if (!ttmm) return;
+          // Nur heute aktiv?
+          if (ttmm !== heuteTTMM) return;
+          const person = String(r['Person']         || '').trim();
+          const spruch = String(r['Spruch']         || '').trim() || ('Happy Birthday, ' + person + '!');
+          const bild   = String(r['Bild-Dateiname'] || '').trim();
+          added.push({
+            id: 'excel-geburtstag-' + i,
+            label: 'Geburtstag',
+            headline: person,
+            icon: '🎂',
+            imageUrl: bild || undefined,
+            customText: spruch,
+            durationMs: 14000,
+            explosionDelayMs: 3000,
+            // kein activeDate — wir filtern oben schon manuell auf "heute"
+            specialEffect: 'flyingGifts',
+          });
+        });
+      }
+
+      if (added.length > 0) {
+        EASTER_EGGS = EASTER_EGGS.concat(added);
+        console.info('[Botschaften] ' + added.length + ' Einträge aus Excel geladen');
+      } else {
+        console.info('[Botschaften] Excel gelesen, aber keine aktiven Einträge für heute');
+      }
+    } catch (e) {
+      console.warn('[Botschaften] Fehler beim Excel-Laden — Cockpit läuft mit hartkodierter Liste:', e);
+    }
+  }
+
+  // Datum aus Excel kann sein: Date-Object, "2026-05-27", "27.05.2026" — alles auf ISO normalisieren
+  function normalizeDateToISO(v) {
+    if (v instanceof Date && !isNaN(v)) {
+      return v.toISOString().slice(0, 10);
+    }
+    const s = String(v).trim();
+    // Bereits ISO?
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    // Deutsches Format TT.MM.JJJJ
+    const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+    return null;
+  }
+
+  // Beim Page-Load: Excel asynchron nachladen.
+  // Die Auto-Cycle-setInterval-Schleife unten liest EASTER_EGGS zur Laufzeit — deshalb funktioniert es,
+  // auch wenn die Excel erst nach ein paar Sekunden geladen ist.
+  loadCockpitBotschaftenFromExcel();
+
   const EASTER_EGG_INTERVAL_MIN = 1;    // alle 1 Min wird ein zufälliges Easter Egg gezeigt
 
   function showEasterEgg(egg) {
