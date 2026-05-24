@@ -2540,6 +2540,16 @@
 
   function showEasterEgg(egg) {
     if (!egg) return;
+    // Spezial-Intro: 3-2-1-Countdown vor der eigentlichen Anzeige
+    if (egg.specialEffect === 'countdown321') {
+      runCountdown321(egg.countdownTitle || egg.label || '', () => showEasterEggCore(egg));
+      return;
+    }
+    showEasterEggCore(egg);
+  }
+
+  function showEasterEggCore(egg) {
+    if (!egg) return;
     // Phase 1: ruhig — nur Bild + Spruch anzeigen, KEINE Effekte
     showMilestone({
       icon: egg.icon || '🎉',
@@ -2563,7 +2573,49 @@
       spawnConfetti(30);
       if (egg.specialEffect === 'flyingGifts')     spawnFlyingGifts(10);
       if (egg.specialEffect === 'shootingTokens')  spawnShootingTokens(16);
+      if (egg.specialEffect === 'countdown321')    spawnConfetti(20);   // dezenter Nachschlag
     }, explosionDelay);
+  }
+
+  // ====== 3-2-1 Countdown vor Spezial-Botschaften ======
+  // Ablauf: Titel ~1.6s ruhig stehen → 3 → 2 → 1 (je 0.9s) → Overlay weg → onDone()
+  // FireTV-safe: 1 sichtbares Element pro Tick, nur transform/opacity-Animation
+  function runCountdown321(titleText, onDone) {
+    const overlay = document.getElementById('countdownOverlay');
+    const label   = document.getElementById('countdownLabel');
+    const num     = document.getElementById('countdownNumber');
+    if (!overlay || !num) { if (onDone) onDone(); return; }
+
+    label.textContent = titleText || '';
+    num.textContent   = '';
+    num.classList.remove('tick');
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    // Titel ~1.6s wirken lassen, dann Countdown starten
+    setTimeout(() => {
+      const seq = ['3', '2', '1'];
+      let i = 0;
+      const tick = () => {
+        if (i >= seq.length) {
+          // kurz nachklingen, dann Overlay schließen
+          setTimeout(() => {
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            if (onDone) onDone();
+          }, 220);
+          return;
+        }
+        num.classList.remove('tick');
+        // Reflow erzwingen, damit die Animation sauber neu startet
+        void num.offsetWidth;
+        num.textContent = seq[i];
+        num.classList.add('tick');
+        i++;
+        setTimeout(tick, 900);
+      };
+      tick();
+    }, 1600);
   }
 
   // ====== Verrückte Effekte: fliegende Emojis ======
