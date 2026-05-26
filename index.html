@@ -828,6 +828,79 @@
     100% { transform: scale(0.7); opacity: 0; }
   }
 
+  /* ====== Joke-Flash (Spaaaß-Twist zwischen Akten) ====== */
+  /* FireTV-safe: 1 Element, nur transform + opacity */
+  #jokeFlashOverlay {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(245, 199, 87, 0.32) 0%, rgba(7, 9, 15, 0.88) 70%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9850;
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+  }
+  #jokeFlashOverlay.show { display: flex; opacity: 1; }
+  .joke-flash-text {
+    font-size: 300px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 6px 30px rgba(212, 167, 64, 0.65);
+    white-space: nowrap;
+    will-change: transform, opacity;
+    transform: scale(0.3) rotate(-8deg);
+    opacity: 0;
+  }
+  .joke-flash-text.go {
+    animation: joke-pop 2.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes joke-pop {
+    0%   { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+    18%  { transform: scale(1.18) rotate(5deg); opacity: 1; }
+    40%  { transform: scale(1.00) rotate(-3deg); opacity: 1; }
+    60%  { transform: scale(1.06) rotate(2deg); opacity: 1; }
+    85%  { transform: scale(1.00) rotate(0deg); opacity: 1; }
+    100% { transform: scale(1.30) rotate(0deg); opacity: 0; }
+  }
+
+  /* ====== Ending-Cheer (Schluss-Satz über den ganzen Bildschirm) ====== */
+  #endingCheerOverlay {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, rgba(212, 167, 64, 0.38) 0%, rgba(7, 9, 15, 0.94) 75%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9850;
+    opacity: 0;
+    transition: opacity 0.35s ease-out;
+  }
+  #endingCheerOverlay.show { display: flex; opacity: 1; }
+  .ending-cheer-text {
+    font-size: 150px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-align: center;
+    padding: 0 40px;
+    text-shadow: 0 6px 30px rgba(245, 199, 87, 0.5);
+    white-space: pre-line;
+    will-change: transform, opacity;
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  .ending-cheer-text .gold { color: var(--gold); }
+  .ending-cheer-text.go {
+    animation: ending-cheer-pop 1.0s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes ending-cheer-pop {
+    0%   { transform: scale(0.5);  opacity: 0; }
+    55%  { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+
   /* ====== Verrückte Effekte: fliegende Emojis (Geschenke, Tokens, …) ====== */
   /* z-index 99999 = ÜBER allem (auch Milestone-Overlay) → kommen in den Vordergrund */
   /* drop-shadow-Filter entfernt — FireTV-GPU crasht sonst */
@@ -899,6 +972,16 @@
 <div id="countdownOverlay" aria-hidden="true">
   <div class="countdown-label" id="countdownLabel"></div>
   <div class="countdown-number" id="countdownNumber">3</div>
+</div>
+
+<!-- Joke-Flash Overlay (Spaaaß-Twist zwischen Akten) -->
+<div id="jokeFlashOverlay" aria-hidden="true">
+  <div class="joke-flash-text" id="jokeFlashText">Spaß!</div>
+</div>
+
+<!-- Ending-Cheer Overlay (Vollbild-Schluss-Satz) -->
+<div id="endingCheerOverlay" aria-hidden="true">
+  <div class="ending-cheer-text" id="endingCheerText">Supaaaaaa!</div>
 </div>
 
 <!-- Cockpit-Inhalt (wird via JS auf Viewport-Größe skaliert) -->
