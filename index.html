@@ -2645,19 +2645,38 @@
       countdownTitle: 'Couple of the Month',
       followUpId: 'coupleJoke',
     },
-    // ===== Reveal-Gag: Auflösung nach Couple of the Month =====
+    // ===== Akt-Zwischenspiel: Spaß-Twist =====
+    // Großer goldener „Spaaaß!"-Flash zwischen Couple of the Month und Reveal
+    {
+      id: 'coupleJoke',
+      specialEffect: 'jokeFlash',
+      flashText: 'Spaaaß!',
+      durationMs: 2500,
+      followUpId: 'coupleReveal',
+      noAutoCycle: true,
+    },
+    // ===== Reveal-Gag: Auflösung nach dem Spaß-Twist =====
     // Wird NICHT im Auto-Cycle gezogen (noAutoCycle), nur über followUpId oder Hotkey 3× V
     {
       id: 'coupleReveal',
       label: 'Plot Twist',
       headline: 'Vivi & Lau',
       icon: '💞',
-      imageUrl: 'laurin-vivi.png',            // Platzhalter — bitte echtes Bild unter diesem Namen ablegen
+      imageUrl: 'laurin-vivi.png',
       customText: 'Das wahre Couple of the Month',
       durationMs: 14000,
       explosionDelayMs: 3000,
       specialEffect: 'countdown321',
       countdownTitle: 'Es sind natürlich …',
+      noAutoCycle: true,
+      followUpId: 'coupleEndingCheer',        // danach: Vollbild-Schluss-Cheer
+    },
+    // ===== Schluss-Cheer: fetter Satz über den ganzen Bildschirm =====
+    {
+      id: 'coupleEndingCheer',
+      specialEffect: 'endingCheer',
+      cheerText: 'Supaaaaaa,\nweitermachen!',
+      durationMs: 7000,
       noAutoCycle: true,
     },
     // Weitere Easter Eggs kannst du hier ergänzen:
@@ -3053,10 +3072,12 @@
       if (c >= count) { c = 0; action(); }
     });
   }
-  triggerHotkey('h', 3, () => { const egg = findEasterEggById('henry');            if (egg) showEasterEgg(egg); });
-  triggerHotkey('a', 3, () => { const egg = findEasterEggById('attila');           if (egg) showEasterEgg(egg); });
-  triggerHotkey('l', 3, () => { const egg = findEasterEggById('coupleOfTheMonth'); if (egg) showEasterEgg(egg); });
-  triggerHotkey('v', 3, () => { const egg = findEasterEggById('coupleReveal');     if (egg) showEasterEgg(egg); });
+  triggerHotkey('h', 3, () => { const egg = findEasterEggById('henry');             if (egg) showEasterEgg(egg); });
+  triggerHotkey('a', 3, () => { const egg = findEasterEggById('attila');            if (egg) showEasterEgg(egg); });
+  triggerHotkey('l', 3, () => { const egg = findEasterEggById('coupleOfTheMonth');  if (egg) showEasterEgg(egg); });
+  triggerHotkey('v', 3, () => { const egg = findEasterEggById('coupleReveal');      if (egg) showEasterEgg(egg); });
+  triggerHotkey('j', 3, () => { const egg = findEasterEggById('coupleJoke');        if (egg) showEasterEgg(egg); });
+  triggerHotkey('s', 3, () => { const egg = findEasterEggById('coupleEndingCheer'); if (egg) showEasterEgg(egg); });
 </script>
 
 </body>
