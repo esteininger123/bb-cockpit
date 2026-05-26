@@ -2776,9 +2776,13 @@
   function showEasterEgg(egg) {
     if (!egg) return;
     easterEggInProgress = true;
-    // Spezial-Intro: 3-2-1-Countdown vor der eigentlichen Anzeige
+    // Spezial-Effekte
     if (egg.specialEffect === 'countdown321') {
       runCountdown321(egg.countdownTitle || egg.label || '', () => showEasterEggCore(egg));
+    } else if (egg.specialEffect === 'jokeFlash') {
+      runJokeFlash(egg.flashText || 'Spaaaß!', egg.durationMs || 2500);
+    } else if (egg.specialEffect === 'endingCheer') {
+      runEndingCheer(egg.cheerText || 'Supaaaaaa!', egg.durationMs || 7000);
     } else {
       showEasterEggCore(egg);
     }
@@ -2787,19 +2791,63 @@
 
   // Nach Ende des Eggs: Lock lösen, ggf. Follow-up triggern
   function scheduleAfterEgg(egg) {
-    const cdMs = (egg.specialEffect === 'countdown321') ? 4700 : 0;   // 1.6s Titel + 3×0.9s + 0.22s Nachklang
-    const totalMs = cdMs + (egg.durationMs || 10000);
+    let totalMs;
+    if (egg.specialEffect === 'countdown321') {
+      totalMs = 4700 + (egg.durationMs || 10000);   // 1.6s Titel + 3×0.9s + 0.22s Nachklang + Bild
+    } else if (egg.specialEffect === 'jokeFlash') {
+      totalMs = (egg.durationMs || 2500);           // nur Flash-Dauer, kein Countdown davor
+    } else if (egg.specialEffect === 'endingCheer') {
+      totalMs = (egg.durationMs || 7000);           // Vollbild-Schluss-Satz
+    } else {
+      totalMs = (egg.durationMs || 10000);
+    }
     setTimeout(() => {
-      // Follow-up?
       if (egg.followUpId) {
         const next = findEasterEggById(egg.followUpId);
         if (next) {
-          setTimeout(() => showEasterEgg(next), 600);   // 0.6s Atempause zwischen Akt 1 und Akt 2
+          setTimeout(() => showEasterEgg(next), 400);   // kurze Atempause zwischen Akten
           return;
         }
       }
       easterEggInProgress = false;
     }, totalMs);
+  }
+
+  // ====== Joke-Flash (Spaaaß-Twist) ======
+  function runJokeFlash(text, durationMs) {
+    const overlay = document.getElementById('jokeFlashOverlay');
+    const el      = document.getElementById('jokeFlashText');
+    if (!overlay || !el) return;
+    el.textContent = text;
+    el.classList.remove('go');
+    void el.offsetWidth;   // Reflow → Animation sauber neu starten
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    el.classList.add('go');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+    }, durationMs);
+  }
+
+  // ====== Ending-Cheer (Vollbild-Schluss-Satz) ======
+  function runEndingCheer(text, durationMs) {
+    const overlay = document.getElementById('endingCheerOverlay');
+    const el      = document.getElementById('endingCheerText');
+    if (!overlay || !el) return;
+    // \n in Excel-Texten als echten Zeilenumbruch rendern (pre-line)
+    el.textContent = text;
+    el.classList.remove('go');
+    void el.offsetWidth;
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    el.classList.add('go');
+    // Konfetti-Schauer als finaler Klatscher (FireTV-konform: 40 Partikel)
+    spawnConfetti(40);
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+    }, durationMs);
   }
 
   function showEasterEggCore(egg) {
@@ -2982,8 +3030,12 @@
       // Sichtbares Overlay → auch nicht
       const overlay = document.getElementById('milestoneOverlay');
       const cdOverlay = document.getElementById('countdownOverlay');
+      const jokeOverlay = document.getElementById('jokeFlashOverlay');
+      const endOverlay  = document.getElementById('endingCheerOverlay');
       if (overlay && overlay.classList.contains('show')) return;
       if (cdOverlay && cdOverlay.classList.contains('show')) return;
+      if (jokeOverlay && jokeOverlay.classList.contains('show')) return;
+      if (endOverlay && endOverlay.classList.contains('show')) return;
       const egg = pickRandomEasterEgg();
       if (egg) showEasterEgg(egg);
     }, EASTER_EGG_INTERVAL_MIN * 60 * 1000);
