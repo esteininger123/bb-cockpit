@@ -2681,9 +2681,59 @@
       durationMs: 7000,
       noAutoCycle: true,
     },
+    // ===== Mitmach-Einladung: QR-Code zum Einreichen eigener Ideen =====
+    // Läuft ab heute dauerhaft im Auto-Cycle. Der QR wird beim Start client-seitig erzeugt
+    // (siehe generateEinreichungsQR unten) und in imageUrl gefüllt. Öffnet beim Scannen eine
+    // vorausgefüllte Mail an Edgar — identische Vorlage wie die gedruckte QR-Code-Botschaft.html.
+    {
+      id: 'einreichungEinladung',
+      label: 'Mitmachen',
+      headline: 'Deine Idee aufs Cockpit',
+      icon: '📸',
+      imageUrl: undefined,                    // wird beim Start mit dem QR-Data-URL gefüllt
+      customText: 'Scan mich mit dem Handy → schick mir deinen Spruch, ein Wunsch-Datum und ein Bild. Edgar prüft, dann läuft\'s hier oben.',
+      durationMs: 18000,                       // bewusst lang: Zeit zum Handy zücken & scannen
+      explosionDelayMs: 999999,                // kein Konfetti — QR soll ruhig & scharf scannbar bleiben
+      qrImage: true,                           // statisch (nicht hüpfend) + weißer Hintergrund, siehe showEasterEggCore
+      activeFrom: '2026-05-29',
+    },
     // Weitere Easter Eggs kannst du hier ergänzen:
     // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000, activeDate: 'YYYY-MM-DD' },
   ];
+
+  // ====== QR-Code fürs Einreichungs-Egg beim Start erzeugen ======
+  // Baut denselben mailto wie die gedruckte QR-Code-Botschaft.html und rendert ihn EINMAL
+  // in ein PNG-Data-URL. Bei jedem Fehler: still loggen — das Egg zeigt dann nur Text + Icon.
+  function generateEinreichungsQR() {
+    try {
+      if (typeof QRCode === 'undefined') { console.warn('[Einreichung] QR-Lib nicht geladen — Egg zeigt nur Text'); return; }
+      const to   = 'e.steininger@immo-stein.de';
+      const subj = 'Cockpit-Botschaft';
+      const body =
+        'Hallo Edgar,\n\n' +
+        'ich hätte gerne folgende Botschaft am Cockpit:\n\n' +
+        'Spruch / Headline:\n(hier eintragen)\n\n' +
+        'Anzeige-Datum (z.B. 27.05.2026):\n(hier eintragen)\n\n' +
+        'Bild: (gerne als Anhang dieser Mail)\n\n' +
+        'Absender:\n(dein Name)\n\n' +
+        'Danke!';
+      const mailto = 'mailto:' + encodeURIComponent(to) +
+        '?subject=' + encodeURIComponent(subj) +
+        '&body='    + encodeURIComponent(body);
+      QRCode.toDataURL(mailto, {
+        width: 600,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+        color: { dark: '#07090F', light: '#ffffff' }
+      }, function (err, url) {
+        if (err) { console.warn('[Einreichung] QR-Erzeugung fehlgeschlagen:', err); return; }
+        const egg = (typeof findEasterEggById === 'function') ? findEasterEggById('einreichungEinladung') : null;
+        if (egg) { egg.imageUrl = url; console.info('[Einreichung] QR-Code erzeugt & ins Egg gehängt'); }
+      });
+    } catch (e) {
+      console.warn('[Einreichung] QR-Setup-Fehler:', e);
+    }
+  }
 
   // ====== Excel-Quelle: Cockpit-Botschaften.xlsx ======
   // Edgar pflegt Botschaften + Geburtstage in der Excel im selben Ordner.
@@ -2788,6 +2838,7 @@
   // Die Auto-Cycle-setInterval-Schleife unten liest EASTER_EGGS zur Laufzeit — deshalb funktioniert es,
   // auch wenn die Excel erst nach ein paar Sekunden geladen ist.
   loadCockpitBotschaftenFromExcel();
+  generateEinreichungsQR();             // QR fürs Mitmach-Egg beim Start erzeugen
 
   const EASTER_EGG_INTERVAL_MIN = 2;    // alle 2 Min wird ein zufälliges Easter Egg gezeigt
 
@@ -2885,6 +2936,19 @@
     // Label oben über der Headline überschreiben (statt "MEILENSTEIN ERREICHT")
     const labelEl = document.querySelector('#milestoneOverlay .milestone-label');
     if (labelEl && egg.label) labelEl.textContent = egg.label;
+
+    // QR-Eggs: Bild statisch (nicht hüpfend) + weißer Rahmen, damit es sicher scannbar ist
+    if (egg.qrImage) {
+      const v = document.getElementById('milestoneVisual');
+      if (v && v.tagName === 'IMG') {
+        v.style.animation    = 'none';
+        v.style.maxWidth     = '440px';
+        v.style.maxHeight    = '440px';
+        v.style.background   = '#ffffff';
+        v.style.padding      = '14px';
+        v.style.borderRadius = '12px';
+      }
+    }
 
     // Phase 2: nach Lesezeit brechen die Effekte los
     const explosionDelay = (typeof egg.explosionDelayMs === 'number') ? egg.explosionDelayMs : 4000;
