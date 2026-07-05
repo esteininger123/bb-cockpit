@@ -1627,7 +1627,10 @@
   };
 
   const PIPELINE_STATUS = {
-    development: ['Entwicklung'],
+    // 'Ankauf' zählt zu development — seit Freiburg (PR 46, 114 WEs, 07/2026) wird der Status
+    // real genutzt. Ohne diesen Eintrag wären frisch angekaufte WEs in der Pipeline unsichtbar
+    // (Vision-1000-Zähler springt, aber keine Kachel erklärt warum).
+    development: ['Ankauf', 'Entwicklung'],
     forSale:     ['Vermarktung / Im Verkauf', 'Reserviert', 'Notartermin'],
     soldLifetime:['Beurkundet', 'Kaufpreis gezahlt', 'Betreuung'],
   };
@@ -1897,7 +1900,7 @@
         targetGIK: targets.targetGIK || 32_000_000,
       },
       pipeline: {
-        bought: 0,                    // Status "Ankauf" wird aktuell nicht genutzt
+        bought: 0,                    // keine eigene Ankauf-Kachel — 'Ankauf' zählt zu development (s. PIPELINE_STATUS)
         development: development,
         forSale: forSale,
         soldLifetime: soldLifetimeStatus,
@@ -2275,6 +2278,7 @@
     'Kapitalanleger investieren bei uns, weil wir liefern.',
     'Jede Wohneinheit ein vertraglicher Cashflow.',
     'Vision 1000 ist Marathon — gemessen in Notarterminen.',
+    'Spechtweg Freiburg: 114 Einheiten auf einen Streich — unser größter Ankauf.',
   ];
 
   function buildTickerItems() {
@@ -2485,6 +2489,7 @@
     }
   }
 
+  let milestoneHideTimer = null;   // Overlap-Fix: altes Hide-Timeout darf neue Anzeige nicht abschneiden
   function showMilestone(m) {
     const overlay  = document.getElementById('milestoneOverlay');
     const visual   = document.getElementById('milestoneVisual');
@@ -2523,7 +2528,9 @@
 
     // Dauer aus dem Eintrag oder 10 Sek default
     const durationMs = (typeof m.durationMs === 'number' && m.durationMs > 0) ? m.durationMs : 10000;
-    setTimeout(() => {
+    if (milestoneHideTimer) clearTimeout(milestoneHideTimer);  // Overlap-Fix (s.o.)
+    milestoneHideTimer = setTimeout(() => {
+      milestoneHideTimer = null;
       overlay.classList.remove('show');
       overlay.setAttribute('aria-hidden', 'true');
       if (headlineEl) headlineEl.style.display = '';  // wieder zurücksetzen
@@ -2696,6 +2703,23 @@
       explosionDelayMs: 999999,                // kein Konfetti — QR soll ruhig & scharf scannbar bleiben
       qrImage: true,                           // statisch (nicht hüpfend) + weißer Hintergrund, siehe showEasterEggCore
       activeFrom: '2026-05-29',
+    },
+    // ===== Freiburg-Ankauf: größter Deal der Firmengeschichte =====
+    // Von Edgar freigegeben am 05.07.2026 (per Mail, v2 mit Luftbild).
+    // Dezente Vollbild-Meldung: explosionDelayMs riesig = Konfetti/Effekte kommen nie.
+    // Test-Hotkey: 3× "F".
+    {
+      id: 'freiburgAnkauf',
+      label: 'Größter Ankauf unserer Geschichte',
+      headline: 'Freiburg gehört uns.',
+      icon: '🏙️',
+      imageUrl: 'freiburg-spechtweg.jpg',
+      customText: '114 Wohneinheiten · Spechtweg 33–37, Freiburg · Notar 3. Juli 2026 · 14,2 Mio € Gesamtinvestition. Danke an das ganze Team — unser bisher größter Schritt Richtung Vision 1000.',
+      durationMs: 22000,
+      explosionDelayMs: 999999,               // dezent — kein Konfetti (>= durationMs = Timer wird nie armiert)
+      staticImage: true,                      // Luftbild steht ruhig, kein Hüpfen
+      activeFrom: '2026-07-05',
+      activeUntil: '2026-07-12',
     },
     // Weitere Easter Eggs kannst du hier ergänzen:
     // { id: 'xyz', label: 'Spaß', headline: '...', icon: '🎉', imageUrl: '...', customText: '...', durationMs: 10000, activeDate: 'YYYY-MM-DD' },
@@ -2950,8 +2974,18 @@
       }
     }
 
-    // Phase 2: nach Lesezeit brechen die Effekte los
+    // Dezente Bild-Eggs: Foto steht ruhig (keine Hüpf-Animation), ohne QR-Weißrahmen
+    if (egg.staticImage) {
+      const v = document.getElementById('milestoneVisual');
+      if (v && v.tagName === 'IMG') v.style.animation = 'none';
+    }
+
+    // Phase 2: nach Lesezeit brechen die Effekte los.
+    // Liegt der Delay außerhalb der Anzeigedauer (Konvention für „dezent — nie Effekte"),
+    // wird der Timer gar nicht erst armiert. Sonst feuert er Minuten später Konfetti in
+    // irgendeine dann zufällig offene Anzeige (Latenz-Bombe, Review-Finding 05.07.2026).
     const explosionDelay = (typeof egg.explosionDelayMs === 'number') ? egg.explosionDelayMs : 4000;
+    if (explosionDelay >= (egg.durationMs || 10000)) return;
     setTimeout(() => {
       // Overlay muss noch sichtbar sein, sonst macht die Show keinen Sinn
       const overlay = document.getElementById('milestoneOverlay');
@@ -3145,6 +3179,7 @@
   triggerHotkey('j', 3, () => { const egg = findEasterEggById('coupleJoke');        if (egg) showEasterEgg(egg); });
   triggerHotkey('s', 3, () => { const egg = findEasterEggById('coupleEndingCheer'); if (egg) showEasterEgg(egg); });
   triggerHotkey('e', 3, () => { const egg = findEasterEggById('einreichungEinladung'); if (egg) showEasterEgg(egg); });
+  triggerHotkey('f', 3, () => { const egg = findEasterEggById('freiburgAnkauf');       if (egg) showEasterEgg(egg); });
 </script>
 
 </body>
